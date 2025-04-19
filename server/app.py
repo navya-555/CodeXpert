@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from models import db
 from flask_migrate import Migrate
-from server.blueprints.auth_bp import auth_bp
+from blueprints.auth_bp import auth_bp
 from blueprints.code_bp import code_bp
 
 app = Flask(__name__)
