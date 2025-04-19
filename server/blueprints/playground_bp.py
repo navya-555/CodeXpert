@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import Question, Assignment,db
 from blueprints.utils.auth_utils import decode_auth_header
-from blueprints.utils.code_utils import get_lab_questions
+from blueprints.utils.code_utils import get_lab_questions, get_followup_question
 import json
 import ast
 
@@ -9,7 +9,7 @@ import ast
 playground_bp = Blueprint('playground', __name__)
 
 @playground_bp.route('/api/get-parent-question', methods=['GET'])
-def get_parent_question():
+def parent_question():
     # auth_header = request.headers.get('Authorization')
     # payload, error = decode_auth_header(auth_header)
     # if error:
@@ -54,3 +54,32 @@ def get_parent_question():
     except Exception as e:
         print(f"Error fetching questions: {e}")
         return jsonify({'message': 'Error fetching questions'}), 500
+
+
+@playground_bp.route('/api/get-followup-question', methods=['POST'])
+def followup_question():
+    data = request.get_json()
+    parent_question = data.get('parent_question')
+    code = data.get('code')
+
+    student_id = 'cd456'
+    assignment_id = 'abcd1'
+    
+    try:
+        question = Question.query.filter_by(assignment_id=assignment_id,student_id = student_id).first()
+        if question:
+            if question.followup_question is not None:
+                return jsonify({'followup_question': question.followup_question}), 200
+            
+            followup_question = get_followup_question(parent_question, code)
+            if followup_question is None:
+                return jsonify({"error": "Error generating follow-up question"}), 123
+            print(followup_question)
+            question.followup_question = str(followup_question)
+            db.session.commit()
+            return jsonify({'followup_question': followup_question}), 200
+        else:
+            return jsonify({'error': 'Parent question not found'}), 404
+    except Exception as e:
+        print(f"Error generating follow-up question: {e}")
+        return jsonify({'error': 'Error generating follow-up question'}), 500
