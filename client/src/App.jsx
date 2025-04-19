@@ -73,7 +73,7 @@ function App() {
           path="/student-dashboard" 
           element={
             <ProtectedRoute userType="student">
-              <AppLayout><StudentDashboard /></AppLayout>
+            <StudentDashboard /> 
             </ProtectedRoute>
           } 
         />
@@ -81,7 +81,7 @@ function App() {
           path="/teacher-dashboard" 
           element={
             <ProtectedRoute userType="teacher">
-              <AppLayout><TeacherDashboard /></AppLayout>
+            <TeacherDashboard />
             </ProtectedRoute>
           } 
         />
