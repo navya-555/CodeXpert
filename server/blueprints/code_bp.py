@@ -16,9 +16,9 @@ def run_code():
 
     code = data.get('code')
     language = data.get('language')
-    stdin = data.get('input', '')  # Get custom input or default to empty string
+    stdin = data.get('input', '')  
+    question = data.get('question')  
 
-    # Prepare the payload for the external API
     payload = {
         "language": language,
         "stdin": stdin,
@@ -43,14 +43,25 @@ def run_code():
 
         # Check if the external API returned successfully
         if response.status_code == 200 and response_data.get("status") == "success":
-            # Send back stdout and execution time
+            
+            correction_response = {
+                "Approved": 0,
+                "Reason": "Code execution failed",
+            }
+            if response_data.get("stderr") is None:
+                correction_response  = check_code(question, code, response_data.get("stdout"))
+                if correction_response is None:
+                    return jsonify({"error": "Error generating correction result"}), 123
+
             return jsonify({
                 "status": "success",
                 "message": "Code executed successfully",
                 "exception": response_data.get("exception", ""),
                 "stdout": response_data.get("stdout"),
                 "stderr": response_data.get("stderr", ""),
-                "executionTime": response_data.get("executionTime")
+                "executionTime": response_data.get("executionTime"),
+                "approved": correction_response["Approved"],
+                "reason": correction_response["Reason"],
             })
 
         else:
@@ -59,18 +70,44 @@ def run_code():
                 "message": "Code execution failed",
                 "stdout": response_data.get("stdout", ""),
                 "stderr": response_data.get("stderr", ""),
-                "executionTime": response_data.get("executionTime", 0)
+                "executionTime": response_data.get("executionTime", 0),
+                "approved": 0,
+                "reason": "Code execution failed",
             })
 
     except Exception as e:
         # Catch any exceptions and return error
         return jsonify({
             "status": "error",
-            "message": str(e),
+            "message": "Server error: " + str(e),
             "stdout": "",
-            "stderr": str(e),
-            "executionTime": 0
+            "stderr": "Server error: " + str(e),
+            "executionTime": 0,
+            "approved": 0,
+            "reason": "Server error",
         })
+
+
+@code_bp.route("/check", methods=['POST'])
+def check():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid JSON payload"}), 400
+
+        ques = data.get("ques")
+        code = data.get("code")
+        output = data.get("output")
+
+        if not ques or not code:
+            return jsonify({"error": "Missing required fields: 'ques' or 'code' or 'output'"}), 400
+
+        res = check_code(ques, code, output)
+        if not res:
+            return jsonify({"error": "Error generating result"}), 123
+        return jsonify(res), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @code_bp.route("/master-ques", methods=['POST'])
 def generate_ques():
@@ -132,27 +169,5 @@ def generate_hints():
         if not hints:
             return jsonify({"error": "Error generating hints"}), 123
         return jsonify(hints), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@code_bp.route("/check", methods=['POST'])
-def check():
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "Invalid JSON payload"}), 400
-
-        ques = data.get("ques")
-        code = data.get("code")
-        output = data.get("output")
-
-        if not ques or not code:
-            return jsonify({"error": "Missing required fields: 'ques' or 'code' or 'output'"}), 400
-
-        res = check_code(ques, code, output)
-        if not res:
-            return jsonify({"error": "Error generating result"}), 123
-        return jsonify(res), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -204,7 +204,7 @@ def check_code(question_details: dict, student_code: str, output: str):
     --- Return Your Final Judgment in the Following JSON Format ---
     
         "Approved": (int) 1 if everything is correct, else 0,
-        "Reason": (str) Briefly explain why it's approved or what’s wrong (e.g., wrong return type, incorrect logic, wrong function name, etc.)
+        "Reason": (str) Briefly explain why it's approved or what’s wrong addressing the student in reason. (e.g., wrong return type, incorrect logic, wrong function name, etc.)
     
     """
     response = model.generate_content(prompt,generation_config=genai.GenerationConfig(response_mime_type="application/json"))

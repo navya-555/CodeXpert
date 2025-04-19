@@ -97,41 +97,43 @@ const Playground = () => {
           code,
           language: selectedLanguage,
           input,
+          question: questions[currentQuestion]
         }),
       });
   
       const resultData = await response.json();
+      const { stdout, stderr, approved, reason } = resultData;
   
-      // Check if there is an error in the execution (stderr)
-      const { stdout, stderr } = resultData;
+      let resultMessage = '';
   
-      // Construct the result message, showing both stdout and stderr if present
-      if (response.ok) {
-        let resultMessage = '';
-  
-        // If there's any standard output (stdout), show it
-        if (stdout) {
-          resultMessage += `Output: \n${stdout}`;
-        }
-  
-        // If there's any standard error (stderr), show it as well
-        if (stderr) {
-          resultMessage += `\n\nError: \n${stderr}`;
-        }
-  
-        setResult(resultMessage || 'Execution finished without output');
-      } else {
-        setResult(stderr || 'An error occurred during execution');
+      // Include stdout if any
+      if (stdout) {
+        resultMessage += `Output:\n${stdout}`;
       }
   
-      // For demo/testing: marking the question completed if no error from backend
-      if (response.ok && !stderr) {
+      // Include stderr if any
+      if (stderr) {
+        resultMessage += `\n\nError:\n${stderr}`;
+      }
+  
+      // Handle approval status from backend
+      if (approved === 1) {
+        resultMessage += `\n\n✅ Your solution was approved. Great job!`;
         const newCompleted = [...completedQuestions];
         newCompleted[currentQuestion] = true;
         setCompletedQuestions(newCompleted);
+      } else if (approved === 0) {
+        resultMessage += `\n\n🛑 Your solution was not approved.`;
+        if (reason) {
+          resultMessage += `\n📝 Reason: ${reason}`;
+        }
+      } else if (approved === null || typeof approved === 'undefined') {
+        resultMessage += `\n\n⚠️ Could not determine approval status. Please check your output or try again.`;
       }
-
-      setActiveTab('output'); 
+  
+      setResult(resultMessage || 'Execution finished without output');
+      setActiveTab('output');
+  
     } catch (error) {
       console.error('Error running code:', error);
       setResult('Error running code: ' + error.message);
