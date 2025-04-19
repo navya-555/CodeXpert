@@ -90,8 +90,8 @@ const StudentDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Metrics Cards */}
             {[
-              { title: 'Enrolled Courses', value: length(courses), icon: BookOpen },
-              { title: 'Assignments', value: length(assignments), icon: CheckCircle },
+              { title: 'Enrolled Courses', value: courses.length, icon: BookOpen },
+              { title: 'Assignments', value: assignments.length, icon: CheckCircle },
             ].map((item, idx) => (
               <Card key={idx}>
                 <CardHeader className="pb-2">
