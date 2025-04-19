@@ -2,30 +2,69 @@ import { useState, useEffect } from 'react';
 import { Check, Play, Code, ChevronDown, RefreshCw, Copy } from 'lucide-react';
 import { Button } from './ui/button';
 import Editor from "@monaco-editor/react";
-import {
-  PROGRAMMING_LANGUAGES,
-  CODING_QUESTIONS,
-  UI_CONFIG
-} from './../constants';
+import { PROGRAMMING_LANGUAGES, UI_CONFIG } from './../constants';
 
 const Playground = () => {
   // State for code input, selected question, and running status
   const [code, setCode] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [completedQuestions, setCompletedQuestions] = useState(Array(CODING_QUESTIONS.length).fill(false));
+  const [completedQuestions, setCompletedQuestions] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('javascript');
+  const [selectedLanguage, setSelectedLanguage] = useState('python'); // Default to python based on your API response
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [input, setInput] = useState(''); // For custom input
   const [result, setResult] = useState(''); // To store output or error from execution
   const [activeTab, setActiveTab] = useState('code'); // Track which tab is active: 'code' or 'output'
+  const [questions, setQuestions] = useState([]); // Store fetched questions
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch questions from the API
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:5000/api/get-parent-question');
+        if (!response.ok) {
+          throw new Error('Failed to fetch questions');
+        }
+        
+        const data = await response.json();
+        setQuestions(data.questions);
+        // Initialize completed questions array based on fetched questions
+        setCompletedQuestions(Array(data.questions.length).fill(false));
+        setIsLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setIsLoading(false);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
 
   // Set initial code when question or language changes
   useEffect(() => {
-    setCode(CODING_QUESTIONS[currentQuestion].starterCode[selectedLanguage]);
-    setInput(''); // Clear input field whenever question changes
-    setResult(''); // Reset the result when switching questions
-  }, [currentQuestion, selectedLanguage]);
+    if (questions.length > 0) {
+      // Since we don't have starter code in the API response, we'll provide a simple template
+      const getStarterCode = () => {
+        switch (selectedLanguage) {
+          case 'python':
+            return `# ${questions[currentQuestion].title}\n# ${questions[currentQuestion].problem_statement}\n\n# Write your code below\n\n`;
+          case 'javascript':
+            return `// ${questions[currentQuestion].title}\n// ${questions[currentQuestion].problem_statement}\n\n// Write your code below\n\n`;
+          case 'java':
+            return `// ${questions[currentQuestion].title}\n// ${questions[currentQuestion].problem_statement}\n\npublic class Solution {\n    public static void main(String[] args) {\n        // Write your code here\n    }\n}`;
+          default:
+            return `# ${questions[currentQuestion].title}\n# ${questions[currentQuestion].problem_statement}\n\n# Write your code below\n\n`;
+        }
+      };
+      
+      setCode(getStarterCode());
+      setInput(questions[currentQuestion].sample_input || ''); // Set default input from question
+      setResult(''); // Reset the result when switching questions
+    }
+  }, [currentQuestion, selectedLanguage, questions]);
 
   // Handle question selection
   const handleQuestionSelect = (index) => {
@@ -39,8 +78,7 @@ const Playground = () => {
   };
 
   // Handle code input and update line numbers
-  const handleCodeChange = (e) => {
-    const newCode = e.target.value;
+  const handleCodeChange = (newCode) => {
     setCode(newCode);
   };
 
@@ -87,7 +125,7 @@ const Playground = () => {
       }
   
       // For demo/testing: marking the question completed if no error from backend
-      if (response.ok) {
+      if (response.ok && !stderr) {
         const newCompleted = [...completedQuestions];
         newCompleted[currentQuestion] = true;
         setCompletedQuestions(newCompleted);
@@ -102,6 +140,31 @@ const Playground = () => {
     setIsRunning(false);
   };
   
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+        <RefreshCw size={32} className="animate-spin text-blue-600 mb-4" />
+        <p className="text-gray-700">Loading coding challenges...</p>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+        <div className="text-red-500 mb-4">Error: {error}</div>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className={UI_CONFIG.BUTTON_STYLES.primary}
+        >
+          <RefreshCw size={16} className="mr-2" /> Try Again
+        </Button>
+      </div>
+    );
+  }
+  
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Top toolbar with question progress and tab toggle */}
@@ -112,7 +175,7 @@ const Playground = () => {
             <span>Coding Challenge</span>
           </div>
           <div className="flex items-center space-x-2">
-            {CODING_QUESTIONS.slice(0, 3).map((_, index) => (
+            {questions.map((_, index) => (
               <button
                 key={index}
                 onClick={() => handleQuestionSelect(index)}
@@ -206,28 +269,46 @@ const Playground = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Left side - Question description */}
         <div className="w-full md:w-2/5 lg:w-1/3 bg-white border-r border-blue-100 overflow-y-auto p-5">
-          <div className="mb-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-800">
-                {CODING_QUESTIONS[currentQuestion].title}
-              </h2>
-              <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${
-                CODING_QUESTIONS[currentQuestion].difficulty.className
-              }`}>
-                {CODING_QUESTIONS[currentQuestion].difficulty.label}
-              </span>
-            </div>
-          </div>
+          {questions.length > 0 && currentQuestion < questions.length && (
+            <>
+              <div className="mb-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-800">
+                    {questions[currentQuestion].title}
+                  </h2>
+                </div>
+              </div>
 
-          <div className="prose prose-sm max-w-none text-gray-600">
-            <h3 className="text-gray-700 font-semibold mt-2">Description</h3>
-            <p className="whitespace-pre-line">{CODING_QUESTIONS[currentQuestion].description}</p>
-
-            <h3 className="text-gray-700 font-semibold mt-4">Example:</h3>
-            <pre className="bg-gray-50 p-3 rounded-md text-sm overflow-x-auto border border-gray-100">
-              {CODING_QUESTIONS[currentQuestion].example}
-            </pre>
-          </div>
+              <div className="prose prose-sm max-w-none text-gray-600">
+                <h3 className="text-gray-700 font-semibold mt-2">Description</h3>
+                <p className="whitespace-pre-line">{questions[currentQuestion].problem_statement}</p>
+                
+                <div className="mt-4">
+                  <h3 className="text-gray-700 font-semibold">Input Format</h3>
+                  <p className="whitespace-pre-line">{questions[currentQuestion].input_format}</p>
+                </div>
+                
+                <div className="mt-4">
+                  <h3 className="text-gray-700 font-semibold">Output Format</h3>
+                  <p className="whitespace-pre-line">{questions[currentQuestion].output_format}</p>
+                </div>
+                
+                <div className="mt-4">
+                  <h3 className="text-gray-700 font-semibold">Sample Input</h3>
+                  <pre className="bg-gray-100 p-2 rounded-md text-sm overflow-x-auto">
+                    {questions[currentQuestion].sample_input}
+                  </pre>
+                </div>
+                
+                <div className="mt-4">
+                  <h3 className="text-gray-700 font-semibold">Sample Output</h3>
+                  <pre className="bg-gray-100 p-2 rounded-md text-sm overflow-x-auto">
+                    {questions[currentQuestion].sample_output}
+                  </pre>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Input Section */}
           <div className="mt-6">
@@ -251,7 +332,7 @@ const Playground = () => {
                 height="100%"
                 language={selectedLanguage}
                 value={code}
-                onChange={(value) => handleCodeChange({ target: { value } })}
+                onChange={handleCodeChange}
                 theme="vs-dark"
                 options={{
                   fontSize: UI_CONFIG.EDITOR.fontSize,
