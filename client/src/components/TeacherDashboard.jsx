@@ -66,17 +66,6 @@ const TeacherDashboard = () => {
   
     fetchTeacherDashboardData();
   }, []);
-  const renderProgressBar = (value, max) => {
-    const percentage = (value / max) * 100;
-    return (
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div
-          className="bg-indigo-600 h-2.5 rounded-full"
-          style={{ width: `${percentage}%` }}
-        ></div>
-      </div>
-    );
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -143,30 +132,7 @@ const TeacherDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Course Performance</CardTitle>
-                <CardDescription>Overview of your active courses</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {courses.map(course => (
-                  <div key={course.id} className="space-y-2">
-                    <div className="flex justify-between">
-                      <h3 className="font-medium">{course.title}</h3>
-                      <span className="text-sm text-gray-500">{course.students} students enrolled</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-500">
-                      <span>Average Score: {course.avgScore}%</span>
-                      <span>{course.lessons} lessons</span>
-                    </div>
-                    {renderProgressBar(course.avgScore, 100)}
-                  </div>
-                ))}
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">View All Courses</Button>
-              </CardFooter>
-            </Card>
+            {/* Implement basic buttions here*/}
           </div>
         </TabsContent>
 
