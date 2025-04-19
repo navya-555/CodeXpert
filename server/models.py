@@ -122,14 +122,14 @@ class Question(db.Model):
     student_id = db.Column(db.String(5), db.ForeignKey('students.userid'), nullable=False)
     
     # Question fields
-    parent_question = db.Column(db.Text, nullable=False)
+    parent_question = db.Column(db.Text, nullable=True)
     followup_question = db.Column(db.Text, nullable=True)
 
-    parent_time = db.Column(db.Integer, nullable=False)
+    parent_time = db.Column(db.Integer, nullable=True)
     followup_time = db.Column(db.Integer, nullable=True)
 
-    parent_att = db.Column(db.Integer, nullable=False, default=1)
-    followup_att = db.Column(db.Integer, nullable=False, default=0)
+    parent_att = db.Column(db.Integer, nullable=True, default=1)
+    followup_att = db.Column(db.Integer, nullable=True, default=1)
 
     error = db.Column(MutableList.as_mutable(db.JSON), nullable=True)  
     parent_hints = db.Column(MutableList.as_mutable(db.JSON), nullable=True)  
