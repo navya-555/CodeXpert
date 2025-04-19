@@ -38,10 +38,10 @@ def get_teacher_dashboard():
     assignments = []
 
     for class_ in classes:
-        class_assignments = Assignment.query.filter_by(class_id=class_.classid).all()
+        class_assignments = Assignment.query.filter_by(class_id=class_.class_id).all()
 
         courses.append({
-            'id': class_.classid,
+            'id': class_.class_id,
             'title': class_.classname,
             'lessons': len(class_assignments),
         })
@@ -86,11 +86,12 @@ def get_student_dashboard():
     assignments = []
 
     for class_ in classes:
-        class_assignments = Assignment.query.filter_by(class_id=class_.classid).all()
+        related_class = class_.class_ 
+        class_assignments = Assignment.query.filter_by(class_id=class_.class_id).all()
 
         courses.append({
-            'id': class_.classid,
-            'title': class_.classname,
+            'id': class_.class_id,
+            'title': related_class.classname,
             'lessons': len(class_assignments),
         })
 
@@ -98,7 +99,7 @@ def get_student_dashboard():
             assignments.append({
                 'id': assignment.assignment_id,
                 'title': assignment.name,
-                'course': class_.classname,
+                'course': related_class.classname,
             })
 
     return jsonify({
