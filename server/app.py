@@ -4,6 +4,7 @@ from models import db
 from flask_migrate import Migrate
 from blueprints.auth_bp import auth_bp
 from blueprints.code_bp import code_bp
+from blueprints.dashboard_bp import dashboard_bp
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db' 
@@ -16,6 +17,7 @@ CORS(app, supports_credentials=True)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(code_bp)
+app.register_blueprint(dashboard_bp)
 
 @app.route('/api/home', methods=['GET'])
 def get_data():

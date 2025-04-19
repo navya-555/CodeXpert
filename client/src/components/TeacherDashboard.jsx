@@ -1,6 +1,7 @@
 // TeacherDashboard.jsx
-import { useState } from 'react';
-import { 
+import { useState, useEffect } from 'react';
+
+import {
   Card,
   CardContent,
   CardDescription,
@@ -11,45 +12,66 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Users, 
-  BookOpen, 
-  ClipboardCheck, 
-  Calendar, 
-  BarChart, 
+import {
+  Users,
+  BookOpen,
+  ClipboardCheck,
+  Calendar,
+  BarChart,
   PlusCircle,
   Bell,
   Search
 } from 'lucide-react';
 
+
 const TeacherDashboard = () => {
   // eslint-disable-next-line no-unused-vars
   const [activeTab, setActiveTab] = useState('overview');
 
-  const courses = [
-    { id: 1, title: 'Advanced Mathematics', students: 32, lessons: 24, avgScore: 88 },
-    { id: 2, title: 'Physics 101', students: 28, lessons: 18, avgScore: 76 },
-    { id: 3, title: 'English Composition', students: 35, lessons: 15, avgScore: 92 }
-  ];
+  const [courses, setCourses] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [teacher_name, setName] = useState();
 
-  const pendingAssignments = [
-    { id: 1, title: 'Calculus Final Exam', course: 'Advanced Mathematics', submissions: 28, totalStudents: 32 },
-    { id: 2, title: 'Physics Lab Report', course: 'Physics 101', submissions: 20, totalStudents: 28 },
-    { id: 3, title: 'Essay Analysis', course: 'English Composition', submissions: 33, totalStudents: 35 }
-  ];
-
-  const recentActivities = [
-    { id: 1, action: 'New submission', student: 'Emma Johnson', course: 'Advanced Mathematics', time: '1 hour ago' },
-    { id: 2, action: 'Question asked', student: 'Michael Chen', course: 'Physics 101', time: '3 hours ago' },
-    { id: 3, action: 'Grade published', course: 'English Composition', time: 'Yesterday' }
-  ];
-
+  useEffect(() => {
+    const fetchTeacherDashboardData = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error('No auth token found. User may not be logged in.');
+        return;
+      }
+  
+      try {
+        const response = await fetch('http://localhost:5000/api/teacher-dashboard', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          setCourses(data.courses || []);
+          setAssignments(data.assignments || []);
+          setName(data.name || ''); // Set the teacher's name
+          set
+        } else {
+          console.error('Failed to fetch dashboard data:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+  
+    fetchTeacherDashboardData();
+  }, []);
   const renderProgressBar = (value, max) => {
     const percentage = (value / max) * 100;
     return (
       <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div 
-          className="bg-indigo-600 h-2.5 rounded-full" 
+        <div
+          className="bg-indigo-600 h-2.5 rounded-full"
           style={{ width: `${percentage}%` }}
         ></div>
       </div>
@@ -60,12 +82,12 @@ const TeacherDashboard = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Teacher Dashboard</h1>
-          <p className="text-gray-600">Welcome, Professor Smith! Manage your courses and students.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Welome {teacher_name}</h1>
+          <p className="text-gray-600">Welcome Professor, Manage your courses and students.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
           <Button variant="outline" className="flex items-center">
-            <Bell className="mr-2 h-4 w-4" /> 
+            <Bell className="mr-2 h-4 w-4" />
             Notifications
           </Button>
           <Button className="bg-indigo-600 hover:bg-indigo-700">
@@ -89,7 +111,6 @@ const TeacherDashboard = () => {
         <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-8">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
-          <TabsTrigger value="students" className="hidden md:block">Students</TabsTrigger>
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
           <TabsTrigger value="analytics" className="hidden md:block">Analytics</TabsTrigger>
         </TabsList>
@@ -107,19 +128,7 @@ const TeacherDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">Total Students</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center">
-                  <Users className="h-6 w-6 text-indigo-600 mr-2" />
-                  <span className="text-2xl font-bold">185</span>
-                </div>
-              </CardContent>
-            </Card>
-            
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-gray-500">Assignments Created</CardTitle>
@@ -128,18 +137,6 @@ const TeacherDashboard = () => {
                 <div className="flex items-center">
                   <ClipboardCheck className="h-6 w-6 text-indigo-600 mr-2" />
                   <span className="text-2xl font-bold">42</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">Average Score</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center">
-                  <BarChart className="h-6 w-6 text-indigo-600 mr-2" />
-                  <span className="text-2xl font-bold">84%</span>
                 </div>
               </CardContent>
             </Card>
@@ -170,68 +167,7 @@ const TeacherDashboard = () => {
                 <Button variant="outline" className="w-full">View All Courses</Button>
               </CardFooter>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Assignments to Grade</CardTitle>
-                <CardDescription>Recently submitted work</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {pendingAssignments.map(assignment => (
-                    <div key={assignment.id} className="flex items-start">
-                      <div className="h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 mr-3">
-                        <ClipboardCheck className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{assignment.title}</h4>
-                        <p className="text-sm text-gray-500">{assignment.course}</p>
-                        <p className="text-sm text-gray-500">{assignment.submissions}/{assignment.totalStudents} submissions</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full">View All Assignments</Button>
-              </CardFooter>
-            </Card>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivities.map(activity => (
-                  <div key={activity.id} className="flex items-center border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 mr-3">
-                      <Bell className="h-5 w-5 text-gray-600" />
-                    </div>
-                    <div className="flex-grow">
-                      <p className="font-medium">
-                        {activity.action} 
-                        {activity.student && <span className="text-indigo-600"> by {activity.student}</span>}
-                        {activity.course && <span> in {activity.course}</span>}
-                      </p>
-                      <p className="text-sm text-gray-500">{activity.time}</p>
-                    </div>
-                    {activity.action === 'New submission' && (
-                      <Button size="sm" className="ml-2 bg-indigo-600 hover:bg-indigo-700">
-                        Grade
-                      </Button>
-                    )}
-                    {activity.action === 'Question asked' && (
-                      <Button size="sm" className="ml-2 bg-indigo-600 hover:bg-indigo-700">
-                        Reply
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="courses">
@@ -248,22 +184,22 @@ const TeacherDashboard = () => {
             <CardContent>
               <div className="space-y-6">
                 {courses.map(course => (
-                  <div key={course.id} className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                  <div
+                    key={course.id}
+                    className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                  >
                     <div className="flex items-start mb-3 md:mb-0">
                       <div className="h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 mr-3">
                         <BookOpen className="h-5 w-5" />
                       </div>
                       <div>
                         <h4 className="font-medium">{course.title}</h4>
-                        <p className="text-sm text-gray-500">{course.students} students • {course.lessons} lessons • Avg. score {course.avgScore}%</p>
+                        <p className="text-sm text-gray-500">{course.lessons} lessons</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm">
                         Assignments
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Students
                       </Button>
                       <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
                         Manage
@@ -272,18 +208,6 @@ const TeacherDashboard = () => {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="students">
-          <Card>
-            <CardHeader>
-              <CardTitle>Student Management</CardTitle>
-              <CardDescription>View and manage your students</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center py-8 text-gray-500">Student management content will appear here</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -301,15 +225,18 @@ const TeacherDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {pendingAssignments.map(assignment => (
-                  <div key={assignment.id} className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                {assignments.map(assignment => (
+                  <div
+                    key={assignment.id}
+                    className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"
+                  >
                     <div className="flex items-start mb-3 md:mb-0">
                       <div className="h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 mr-3">
                         <ClipboardCheck className="h-5 w-5" />
                       </div>
                       <div>
                         <h4 className="font-medium">{assignment.title}</h4>
-                        <p className="text-sm text-gray-500">{assignment.course} • {assignment.submissions}/{assignment.totalStudents} submissions</p>
+                        <p className="text-sm text-gray-500">{assignment.course}</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
