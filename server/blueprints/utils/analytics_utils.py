@@ -1,11 +1,10 @@
-from app import app
+#from app import app
 from models import db, AssignmentProgress, Question, Student
 from sqlalchemy import func
-import matplotlib.pyplot as plt
 from collections import Counter
 
 # Needed for using the db.session inside Jupyter
-app.app_context().push()
+#app.app_context().push()
 
 def get_avg_time_for_assignment(assignment_id):
     result = (
@@ -19,7 +18,7 @@ def get_avg_time_for_assignment(assignment_id):
 
 
 def get_question_attempt_distribution(assignment_id):
-    with app.app_context():
+    #with app.app_context():
         # Step 1: Get all progress entries for the assignment, grouped by student
         results = (
             db.session.query(AssignmentProgress.student_id, AssignmentProgress.solved_questions)
@@ -42,7 +41,7 @@ def get_question_attempt_distribution(assignment_id):
     
 
 def get_assignment_time_distribution(assignment_id):
-    with app.app_context():
+    #with app.app_context():
         # Step 1: Get all progress entries for the assignment, grouped by student
         results = (
             db.session.query(AssignmentProgress.time)
@@ -70,7 +69,7 @@ def get_avg_score_for_assignment(assignment_id):
 
 
 def get_assignment_score_distribution(assignment_id):
-    with app.app_context():
+    #with app.app_context():
         # Step 1: Get all progress entries for the assignment, grouped by student
         results = (
             db.session.query(AssignmentProgress.score)
@@ -96,7 +95,7 @@ def class_analysis(assignment_id):
 
 
 def get_student_question_parent_time_distribution(student_name, assignment_id):
-    with app.app_context():
+    #with app.app_context():
         # Step 1: Get student_id from student name
         student = db.session.query(Student).filter(Student.name == student_name).first()
 
@@ -122,7 +121,7 @@ def get_student_question_parent_time_distribution(student_name, assignment_id):
 
 
 def get_student_question_followup_time_distribution(student_name, assignment_id):
-    with app.app_context():
+    #with app.app_context():
         # Step 1: Get student_id from student name
         student = db.session.query(Student).filter(Student.name == student_name).first()
 
@@ -148,7 +147,7 @@ def get_student_question_followup_time_distribution(student_name, assignment_id)
 
 
 def get_student_question_attempt_distribution(student_name, assignment_id):
-    with app.app_context():
+    #with app.app_context():
         # Step 1: Get student_id from student name
         student = db.session.query(Student).filter(Student.name == student_name).first()
 
@@ -174,7 +173,7 @@ def get_student_question_attempt_distribution(student_name, assignment_id):
 
 
 def get_student_question_fol_attempt_distribution(student_name, assignment_id):
-    with app.app_context():
+    #with app.app_context():
         # Step 1: Get student_id from student name
         student = db.session.query(Student).filter(Student.name == student_name).first()
 

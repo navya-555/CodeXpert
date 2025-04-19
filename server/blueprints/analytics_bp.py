@@ -1,18 +1,17 @@
 from flask import Blueprint, render_template, request, jsonify
-from blueprints.utils.code_utils import *
 from blueprints.utils.analytics_utils import *
 from dotenv import load_dotenv
-import requests
+import os
 load_dotenv()
 
-analytics_bp = Blueprint('analytics', __name__)
+analysis_bp = Blueprint('analytics', __name__)
 
 API_URL = "https://onecompiler-apis.p.rapidapi.com/api/v1/run"
 API_KEY = os.getenv("RAPIDAPI_KEY")  # Store your API key in an environment variable for security
 API_HOST = "onecompiler-apis.p.rapidapi.com"
 
-@analytics_bp.route('/class-analytics', methods=['POST'])
-def class_analysis():
+@analysis_bp.route('/class-analytics', methods=['POST'])
+def class_analytics():
     try:
         data = request.get_json()
         if not data:
@@ -23,7 +22,7 @@ def class_analysis():
         if not assignment_id:
             return jsonify({"error": "Missing required fields: 'id'"}), 400
 
-        res = class_analysis(id)
+        res = class_analysis(assignment_id)
         if res is None:
             return jsonify({"error": "Error generating result, Most likely due to invalid JSON. Retry!!"}), 123
         return jsonify(res), 200
@@ -31,8 +30,8 @@ def class_analysis():
         return jsonify({"error": str(e)}), 500
     
 
-@analytics_bp.route('/student-analytics', methods=['POST'])
-def student_analysis():
+@analysis_bp.route('/student-analytics', methods=['POST'])
+def student_analytics():
     try:
         data = request.get_json()
         if not data:
