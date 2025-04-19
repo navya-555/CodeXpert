@@ -6,6 +6,7 @@ import StudentLogin from './components/StudentLogin';
 import TeacherLogin from './components/TeacherLogin';
 import StudentDashboard from './components/StudentDashboard';
 import TeacherDashboard from './components/TeacherDashboard';
+import Playground from './components/Playground';
 // import Playground from './components/Playground';
 
 // Protected route component
@@ -84,7 +85,7 @@ function App() {
             </ProtectedRoute>
           } 
         />
-        {/* <Route path="/playground" element={<Playground />} /> */}
+        <Route path="/playground" element={<Playground/>} />
         <Route path="/get-started" element={<Navigate to="/student-login" />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

@@ -55,7 +55,6 @@ const TeacherDashboard = () => {
           setCourses(data.courses || []);
           setAssignments(data.assignments || []);
           setName(data.name || ''); // Set the teacher's name
-          set
         } else {
           console.error('Failed to fetch dashboard data:', data.message);
         }
