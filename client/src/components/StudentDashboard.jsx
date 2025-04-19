@@ -22,6 +22,7 @@ import {
   Search,
   CheckCircle
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard = () => {
   // eslint-disable-next-line no-unused-vars
@@ -30,6 +31,7 @@ const StudentDashboard = () => {
   const [courses, setCourses] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [student_name, setName] = useState();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStudentDashboardData = async () => {
@@ -65,12 +67,21 @@ const StudentDashboard = () => {
     fetchStudentDashboardData();
   }, []);
 
+  // Function to handle redirecting to playground with assignment ID
+  const handleViewAssignment = (assignmentId) => {
+    navigate(`/playground?assignmentId=${assignmentId}`);
+  };
+
+  // Function to navigate to playground without assignment ID
+  const goToPlayground = () => {
+    navigate('/playground');
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Welceome {student_name}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Welcome {student_name}</h1>
           <p className="text-gray-600">Welcome back, Continue your learning journey.</p>
         </div>
         <Button className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700">
@@ -150,6 +161,12 @@ const StudentDashboard = () => {
                 <CardTitle>Assignment Management</CardTitle>
                 <CardDescription>View and grade assignments</CardDescription>
               </div>
+              <Button 
+                className="mt-4 sm:mt-0 bg-blue-600 hover:bg-blue-700"
+                onClick={goToPlayground}
+              >
+                View assignment
+              </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -159,13 +176,23 @@ const StudentDashboard = () => {
                     className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"
                   >
                     <div className="flex items-start mb-3 md:mb-0">
-                      <div className="h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-600 mr-3">
+                      <div className="h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 text-blue-500 mr-3">
                         <ClipboardCheck className="h-5 w-5" />
                       </div>
                       <div>
                         <h4 className="font-medium">{assignment.title}</h4>
                         <p className="text-sm text-gray-500">{assignment.course}</p>
                       </div>
+                    </div>
+                    <div className="self-center">
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        className="text-indigo-600 hover:bg-indigo-50 whitespace-nowrap"
+                        onClick={() => handleViewAssignment(assignment.id)}
+                      >
+                        View Assignment
+                      </Button>
                     </div>
                   </div>
                 ))}
