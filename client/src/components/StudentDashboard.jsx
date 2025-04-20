@@ -261,12 +261,6 @@ const StudentDashboard = () => {
                 <CardTitle>Assignment Management</CardTitle>
                 <CardDescription>View and grade assignments</CardDescription>
               </div>
-              <Button 
-                className="mt-4 sm:mt-0 bg-blue-600 hover:bg-blue-700"
-                onClick={goToPlayground}
-              >
-                View assignment
-              </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">

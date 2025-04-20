@@ -3,6 +3,7 @@ import { Check, Play, Code, ChevronDown, RefreshCw, Copy } from 'lucide-react';
 import { Button } from './ui/button';
 import Editor from "@monaco-editor/react";
 import { PROGRAMMING_LANGUAGES, UI_CONFIG } from './../constants';
+import { useSearchParams } from 'react-router-dom';
 
 const Playground = () => {
   // State for code input, selected question, and running status
@@ -18,30 +19,51 @@ const Playground = () => {
   const [questions, setQuestions] = useState([]); // Store fetched questions
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams();
+  const assignmentId = searchParams.get('assignmentId');
 
   // Fetch questions from the API
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchQuestions = async (retryCount = 0) => {
       setIsLoading(true);
+      const token = localStorage.getItem('authToken');
+  
       try {
-        const response = await fetch('http://localhost:5000/api/get-parent-question');
+        const response = await fetch('http://localhost:5000/api/get-parent-question', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: assignmentId })
+        });
+  
+        if (response.status === 123 && retryCount < 3) {
+          const delay = (retryCount + 1) * 1000;
+          console.warn(`Retrying... attempt ${retryCount + 1} in ${delay / 1000}s`);
+          setTimeout(() => fetchQuestions(retryCount + 1), delay);
+          return;
+        }
+  
         if (!response.ok) {
           throw new Error('Failed to fetch questions');
         }
-        
+  
         const data = await response.json();
         setQuestions(data.questions);
-        // Initialize completed questions array based on fetched questions
         setCompletedQuestions(Array(data.questions.length).fill(false));
         setIsLoading(false);
       } catch (err) {
+        console.error('Fetch error:', err);
         setError(err.message);
         setIsLoading(false);
       }
     };
-
-    fetchQuestions();
-  }, []);
+  
+    if (assignmentId) {
+      fetchQuestions();
+    }
+  }, [assignmentId]);
 
   // Set initial code when question or language changes
   useEffect(() => {

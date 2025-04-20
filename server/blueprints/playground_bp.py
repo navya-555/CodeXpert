@@ -4,20 +4,37 @@ from blueprints.utils.auth_utils import decode_auth_header
 from blueprints.utils.code_utils import get_lab_questions, get_followup_question
 import json
 import ast
+from jwt import decode as jwt_decode
+from dotenv import load_dotenv
+import os
 
 
+load_dotenv()
+JWT_SECRET = os.environ.get('JWT_SECRET')
 playground_bp = Blueprint('playground', __name__)
 
-@playground_bp.route('/api/get-parent-question', methods=['GET'])
+@playground_bp.route('/api/get-parent-question', methods=['POST'])
 def parent_question():
-    # auth_header = request.headers.get('Authorization')
-    # payload, error = decode_auth_header(auth_header)
-    # if error:
-    #     return jsonify({'message': error}), 401
+    auth_header = request.headers.get('Authorization')
+    
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'message': 'Missing or invalid authorization header'}), 401
+    
+    token = auth_header.split(" ")[1]
 
-    student_id = 'cd456' #payload.get('sub')
+    try:
+        payload = jwt_decode(token, JWT_SECRET, algorithms=['HS256'])
+    except Exception as e:
+        print(f"Token decoding error: {e}")
+        return jsonify({'message': 'Invalid token'}), 401
 
-    assgnment_id = 'abcd1'
+    student_id = payload.get('sub')
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON payload"}), 400
+
+    assgnment_id = data.get("id")
 
     try:
         questions = Question.query.filter_by(assignment_id=assgnment_id,student_id = student_id).all()
