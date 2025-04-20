@@ -191,3 +191,20 @@ class AssignmentProgress(db.Model):
             "errors": self.errors
         }
     
+class Error(db.Model):
+    __tablename__ = 'errors'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    student_id = db.Column(db.String(5), nullable=False)
+    error_message = db.Column(db.Text, nullable=False)
+
+
+    def __repr__(self):
+        return f"<Error {self.id} for Student {self.student_id}>"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "student_id": self.student_id,
+            "error_message": self.error_message
+        }

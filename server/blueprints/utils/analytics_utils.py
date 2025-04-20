@@ -1,5 +1,5 @@
 #from app import app
-from models import db, AssignmentProgress, Question, Student
+from models import db, AssignmentProgress, Question, Student, Error
 from sqlalchemy import func
 from collections import Counter
 
@@ -198,9 +198,33 @@ def get_student_question_fol_attempt_distribution(student_name, assignment_id):
         return question_att_dict
 
 
+def get_error_summary_by_student_name(student_name):
+    # Get the student by name
+    student = Student.query.filter_by(name=student_name).first()
+    
+    if not student:
+        print(f"No student found with name: {student_name}")
+        return {}
+
+    # Use the student's ID to fetch error summary
+    results = (
+        db.session.query(Error.error_message, db.func.count().label("count"))
+        .filter(Error.student_id == student.userid)
+        .group_by(Error.error_message)
+        .all()
+    )
+
+    if not results:
+        print(f"No errors found for student: {student_name}")
+        return {}
+
+    return {error: count for error, count in results}
+
+
 def student_analysis(student_name, assignment_id):
     question_parent_time = get_student_question_parent_time_distribution(student_name, assignment_id)
     question_followup_time = get_student_question_followup_time_distribution(student_name, assignment_id)
     question_parent_att = get_student_question_attempt_distribution(student_name, assignment_id)
     question_followup_att = get_student_question_fol_attempt_distribution(student_name, assignment_id)
-    return {"question_parent_time": question_parent_time, "question_followup_time": question_followup_time, "question_parent_att": question_parent_att, "question_followup_att": question_followup_att}
+    get_error=get_error_summary_by_student_name(student_name)
+    return {"question_parent_time": question_parent_time, "question_followup_time": question_followup_time, "question_parent_att": question_parent_att, "question_followup_att": question_followup_att, "get_error": get_error}
