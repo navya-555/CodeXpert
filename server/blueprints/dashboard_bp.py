@@ -38,10 +38,10 @@ def get_teacher_dashboard():
     assignments = []
 
     for class_ in classes:
-        class_assignments = Assignment.query.filter_by(class_id=class_.class_id).all()
+        class_assignments = Assignment.query.filter_by(class_id=class_.classid).all()
 
         courses.append({
-            'id': class_.class_id,
+            'id': class_.classid,
             'title': class_.classname,
             'lessons': len(class_assignments),
         })
