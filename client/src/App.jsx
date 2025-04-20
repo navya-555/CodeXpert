@@ -72,17 +72,17 @@ function App() {
         <Route 
           path="/student-dashboard" 
           element={
-            <ProtectedRoute userType="student">
+ 
             <StudentDashboard /> 
-            </ProtectedRoute>
+        
           } 
         />
         <Route 
           path="/teacher-dashboard" 
           element={
-            <ProtectedRoute userType="teacher">
+         
             <TeacherDashboard />
-            </ProtectedRoute>
+       
           } 
         />
         <Route path="/playground" element={<Playground/>} />
