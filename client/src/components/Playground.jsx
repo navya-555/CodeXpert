@@ -563,7 +563,7 @@ const Playground = () => {
 
               <div className="prose prose-sm max-w-none text-gray-600">
                 {/* Show the follow-up question if available and toggled on */}
-                {followupQuestion && showFollowup && mainQuestionApproved[currentQuestion] ? (
+                {followupQuestion && showFollowup? (
                   <>
                     <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg mb-4">
                       <h3 className="text-orange-700 font-semibold">Follow-up Challenge</h3>

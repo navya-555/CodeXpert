@@ -46,19 +46,19 @@ def parent_question():
             language = assignment.language
 
             generated_data = get_lab_questions(objective, no_ques, language)
-            if generated_data is None:
-                return jsonify({"error": "Error generating questions, Most likely due to invalid JSON. Retry!!"}), 123
-            for q in generated_data['questions']:
-                question = Question(
-                    assignment_id=assgnment_id,
-                    student_id=student_id,
-                    parent_question=str(q),  # Store as stringified JSON
-                    parent_att=1,
-                    followup_att=1
-                )
-                db.session.add(question)
+            # if generated_data is None:
+            #     return jsonify({"error": "Error generating questions, Most likely due to invalid JSON. Retry!!"}), 123
+            # for q in generated_data['questions']:
+            #     question = Question(
+            #         assignment_id=assgnment_id,
+            #         student_id=student_id,
+            #         parent_question=str(q),  # Store as stringified JSON
+            #         parent_att=1,
+            #         followup_att=1
+            #     )
+            #     db.session.add(question)
 
-            db.session.commit()
+            # db.session.commit()
             return jsonify({
                 'questions': generated_data['questions']
             }), 200
@@ -81,22 +81,27 @@ def followup_question():
 
     student_id = 'cd456'
     assignment_id = 'abcd1'
+
+    followup_question = get_followup_question(parent_question, code)
+    if followup_question is None:
+        return jsonify({"error": "Error generating follow-up question"}), 123
+    return jsonify({'followup_question': followup_question}), 200
     
-    try:
-        question = Question.query.filter_by(assignment_id=assignment_id,student_id = student_id).first()
-        if question:
-            if question.followup_question is not None:
-                return jsonify({'followup_question': question.followup_question}), 200
+    # try:
+    #     question = Question.query.filter_by(assignment_id=assignment_id,student_id = student_id).first()
+    #     if question:
+    #         if question.followup_question is not None:
+    #             return jsonify({'followup_question': question.followup_question}), 200
             
-            followup_question = get_followup_question(parent_question, code)
-            if followup_question is None:
-                return jsonify({"error": "Error generating follow-up question"}), 123
-            print(followup_question)
-            question.followup_question = str(followup_question)
-            db.session.commit()
-            return jsonify({'followup_question': followup_question}), 200
-        else:
-            return jsonify({'error': 'Parent question not found'}), 404
-    except Exception as e:
-        print(f"Error generating follow-up question: {e}")
-        return jsonify({'error': 'Error generating follow-up question'}), 500
+    #         followup_question = get_followup_question(parent_question, code)
+    #         if followup_question is None:
+    #             return jsonify({"error": "Error generating follow-up question"}), 123
+    #         print(followup_question)
+    #         question.followup_question = str(followup_question)
+    #         db.session.commit()
+    #         return jsonify({'followup_question': followup_question}), 200
+    #     else:
+    #         return jsonify({'error': 'Parent question not found'}), 404
+    # except Exception as e:
+    #     print(f"Error generating follow-up question: {e}")
+    #     return jsonify({'error': 'Error generating follow-up question'}), 500
