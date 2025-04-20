@@ -19,6 +19,9 @@ import {
   Bell,
   Search
 } from 'lucide-react';
+import AnalyticsTab from './AnalyticsTab'; // adjust the path if necessary
+import AnalyticsTab1 from './AnalyticsTab1'; // adjust the path if necessary
+
 // import { useToast } from '@/components/ui/use-toast'; // Optional - if you have toast notifications
 
 import NewCourseForm from './NewCourseForm';
@@ -215,7 +218,8 @@ const handleNewAssignmentSubmit = async (formData) => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
-          <TabsTrigger value="analytics" className="hidden md:block">Analytics</TabsTrigger>
+          <TabsTrigger value="class-analytics" className="hidden md:block">Class Analytics</TabsTrigger>
+          <TabsTrigger value="student-analytics" className="hidden md:block">Student Analytics</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -345,18 +349,32 @@ const handleNewAssignmentSubmit = async (formData) => {
         </TabsContent>
 
         {/* Analytics Tab */}
-        <TabsContent value="analytics">
+        <TabsContent value="class-analytics">
           <Card>
             <CardHeader>
               <CardTitle>Performance Analytics</CardTitle>
               <CardDescription>View insights and statistics</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center py-8 text-gray-500">Analytics content will appear here</p>
+              <AnalyticsTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="student-analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Analytics</CardTitle>
+              <CardDescription>View insights and statistics</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AnalyticsTab1 />
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      
 
       {/* Form Dialogs */}
       <NewCourseForm 
